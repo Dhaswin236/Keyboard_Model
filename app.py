@@ -20,17 +20,14 @@ def check_dependencies():
             missing_packages.append(package_name)
     
     if missing_packages:
-        st.error("""
-            Missing required packages: {}. 
-            Please install them using:
-            ```
-            pip install {}
-            ```
-            Then restart the app.
-            """.format(
-                ', '.join(missing_packages),
-                ' '.join(missing_packages)
-            )
+        st.error(
+            f"Missing required packages: {', '.join(missing_packages)}.\n\n"
+            "Please install them using:\n\n"
+            f"```\n"
+            f"pip install {' '.join(missing_packages)}\n"
+            f"```\n\n"
+            "Then restart the app."
+        )
         st.stop()
 
 # Check dependencies before proceeding
@@ -45,6 +42,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import train_test_split
 import nltk
+from nltk.corpus import brown
 
 # Download NLTK data
 try:
@@ -52,14 +50,6 @@ try:
 except LookupError:
     with st.spinner("Downloading NLTK data (this may take a minute)..."):
         nltk.download('brown')
-
-# [Rest of your original code continues here...]
-# Include all your existing functions (tokenize, build_vocab, etc.)
-# and the main() function exactly as you had them
-
-if __name__ == "__main__":
-    main()
-
 
 def tokenize(text):
     return re.findall(r'\w+', text.lower())
