@@ -3,11 +3,17 @@ import numpy as np
 import random
 from collections import Counter
 import re
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.neural_network import MLPClassifier
-from sklearn.model_selection import train_test_split
 import nltk
 from nltk.corpus import brown
+
+# Check for required packages
+try:
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.neural_network import MLPClassifier
+    from sklearn.model_selection import train_test_split
+except ImportError as e:
+    st.error(f"Required package not found: {e}. Please install scikit-learn first.")
+    st.stop()
 
 # Download NLTK data
 try:
