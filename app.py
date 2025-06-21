@@ -1,20 +1,36 @@
 import streamlit as st
+import sys
+import subprocess
+import importlib
+
+# Function to install missing packages
+def install_package(package):
+    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+
+# Check and install required packages
+required_packages = {
+    'numpy': 'numpy',
+    'sklearn': 'scikit-learn',
+    'nltk': 'nltk'
+}
+
+for import_name, package_name in required_packages.items():
+    try:
+        importlib.import_module(import_name)
+    except ImportError:
+        with st.spinner(f"Installing required package: {package_name}..."):
+            install_package(package_name)
+        importlib.import_module(import_name)
+
+# Now safely import everything
 import numpy as np
 import random
 from collections import Counter
 import re
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import train_test_split
 import nltk
-from nltk.corpus import brown
-import sys
-
-# Check for required packages
-try:
-    from sklearn.ensemble import RandomForestClassifier
-    from sklearn.neural_network import MLPClassifier
-    from sklearn.model_selection import train_test_split
-except ImportError as e:
-    st.error(f"Required package not found: {e}. Please install scikit-learn first.")
-    st.stop()
 
 # Download NLTK data
 try:
@@ -22,6 +38,7 @@ try:
 except LookupError:
     with st.spinner("Downloading NLTK data..."):
         nltk.download('brown')
+
 
 def tokenize(text):
     return re.findall(r'\w+', text.lower())
