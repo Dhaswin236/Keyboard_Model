@@ -2,6 +2,7 @@ import streamlit as st
 import sys
 import importlib
 
+
 # Required packages with their import names and package names
 REQUIRED_PACKAGES = {
     'numpy': 'numpy',
