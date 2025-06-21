@@ -1,26 +1,40 @@
 import streamlit as st
 import sys
-import subprocess
 import importlib
 
-# Function to install missing packages
-def install_package(package):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
-
-# Check and install required packages
-required_packages = {
+# Required packages with their import names and package names
+REQUIRED_PACKAGES = {
     'numpy': 'numpy',
     'sklearn': 'scikit-learn',
     'nltk': 'nltk'
 }
 
-for import_name, package_name in required_packages.items():
-    try:
-        importlib.import_module(import_name)
-    except ImportError:
-        with st.spinner(f"Installing required package: {package_name}..."):
-            install_package(package_name)
-        importlib.import_module(import_name)
+def check_dependencies():
+    """Check for required packages and show installation instructions if missing"""
+    missing_packages = []
+    
+    for import_name, package_name in REQUIRED_PACKAGES.items():
+        try:
+            importlib.import_module(import_name)
+        except ImportError:
+            missing_packages.append(package_name)
+    
+    if missing_packages:
+        st.error("""
+            Missing required packages: {}. 
+            Please install them using:
+            ```
+            pip install {}
+            ```
+            Then restart the app.
+            """.format(
+                ', '.join(missing_packages),
+                ' '.join(missing_packages)
+            )
+        st.stop()
+
+# Check dependencies before proceeding
+check_dependencies()
 
 # Now safely import everything
 import numpy as np
@@ -36,8 +50,15 @@ import nltk
 try:
     nltk.data.find('corpora/brown')
 except LookupError:
-    with st.spinner("Downloading NLTK data..."):
+    with st.spinner("Downloading NLTK data (this may take a minute)..."):
         nltk.download('brown')
+
+# [Rest of your original code continues here...]
+# Include all your existing functions (tokenize, build_vocab, etc.)
+# and the main() function exactly as you had them
+
+if __name__ == "__main__":
+    main()
 
 
 def tokenize(text):
