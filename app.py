@@ -16,9 +16,80 @@ except LookupError:
     with st.spinner("Downloading NLTK data..."):
         nltk.download('brown')
 
-# [PASTE ALL YOUR EXISTING FUNCTIONS HERE]
-# Include: tokenize(), build_vocab(), encode(), MultimodalKeyboardDataset,
-# prepare_data(), train_model(), predict_next_word()
+def tokenize(text):
+    return re.findall(r'\w+', text.lower())
+
+def build_vocab(corpus, vocab_size=1000):
+    words = tokenize(corpus)
+    word_counts = Counter(words)
+    common_words = word_counts.most_common(vocab_size)
+    vocab = {word: idx for idx, (word, _) in enumerate(common_words)}
+    return vocab
+
+def encode(text, vocab):
+    words = tokenize(text)
+    return [vocab.get(word, -1) for word in words if word in vocab]
+
+class MultimodalKeyboardDataset:
+    def __init__(self, text_data, typing_speeds):
+        self.text_data = text_data
+        self.typing_speeds = typing_speeds
+    
+    def __len__(self):
+        return len(self.text_data) - 1
+    
+    def __getitem__(self, idx):
+        return {
+            'text': self.text_data[idx],
+            'speed': self.typing_speeds[idx],
+            'target': self.text_data[idx + 1]
+        }
+
+def prepare_data(corpus, vocab):
+    words = tokenize(corpus)
+    encoded_words = [vocab.get(word, -1) for word in words if word in vocab]
+    
+    # Generate random typing speeds for demo purposes
+    typing_speeds = [random.uniform(0.1, 1.0) for _ in range(len(encoded_words))]
+    
+    dataset = MultimodalKeyboardDataset(encoded_words, typing_speeds)
+    
+    X = np.array([[x['text'], x['speed']] for x in dataset])
+    y = np.array([x['target'] for x in dataset])
+    
+    return train_test_split(X, y, test_size=0.2, random_state=42)
+
+def train_model(corpus, model_type='random_forest'):
+    vocab = build_vocab(corpus)
+    X_train, X_test, y_train, y_test = prepare_data(corpus, vocab)
+    
+    if model_type == 'random_forest':
+        model = RandomForestClassifier(n_estimators=100)
+    elif model_type == 'neural_net':
+        model = MLPClassifier(hidden_layer_sizes=(64, 32), max_iter=100)
+    else:
+        raise ValueError("Invalid model type")
+    
+    model.fit(X_train, y_train)
+    return model, vocab
+
+def predict_next_word(model, vocab, input_text, typing_speeds):
+    words = tokenize(input_text)
+    encoded_words = [vocab.get(word, -1) for word in words if word in vocab]
+    
+    if not encoded_words:
+        return random.choice(list(vocab.keys()))
+    
+    # Use the last word and average typing speed
+    last_word = encoded_words[-1]
+    avg_speed = sum(typing_speeds) / len(typing_speeds) if typing_speeds else 0.5
+    
+    prediction = model.predict([[last_word, avg_speed]])
+    predicted_idx = prediction[0]
+    
+    # Map index back to word
+    word_lookup = {idx: word for word, idx in vocab.items()}
+    return word_lookup.get(predicted_idx, "unknown")
 
 def main():
     st.title("🧠 Predictive Keyboard with Typing Speed")
