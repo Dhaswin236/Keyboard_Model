@@ -1,7 +1,4 @@
-nltk
-torch
-scikit-learn
-pandas
+streamlit
 numpy
-matplotlib
-seaborn
+scikit-learn
+nltk
