@@ -5,6 +5,7 @@ from collections import Counter
 import re
 import nltk
 from nltk.corpus import brown
+import sys
 
 # Check for required packages
 try:
